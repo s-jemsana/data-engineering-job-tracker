@@ -49,3 +49,47 @@ def transform_data(raw_jobs):
 
     print(f"Data transformation successful. Cleaned {len(cleaned_jobs)} records")
     return cleaned_jobs
+
+def load_data(cleaned_jobs, db_name="job_tracker.dp"):
+    """Loads cleaned job data into a local SQLite relational database."""
+    # Connect to SQLite (will create the file if it doesn't exist)
+    connection = sqlite3.connect(db_name)
+    cursor = connection.cursor()
+
+
+    # Create the jobs table with strict constraints
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS jobs (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   job_title TEXT NOT NULL,
+                   company TEXT NOT NULL,
+                   location TEXTX NOT NULL,
+                   salary TEXT,
+                   job_url TEXT NOT NULL UNIQUE
+                   )
+                   """)
+    inserted_count = 0
+
+    # Loop through the list of dictionaries and insert data safely
+    for job in cleaned_jobs:
+        try:
+            cursor.execute("""
+                           INSERT INTO jobs (job_title, company, location, salary, job_url)
+                           VALUES (?, ?, ?, ?, ?)
+                           """, (
+                               job["job_title"],
+                               job["company"],
+                               job["location"],
+                               job["salary"],
+                               job["job_url"]
+                           ))
+            inserted_count += 1
+        except sqlite3.IntegrityError:
+            # Catch duplicates based on the UNIQUE job_url constraint
+            continue
+    
+    # Commit the transaction to save changes permanently
+    connection.commit()
+    connection.close()
+
+    print(f"Data loading successful. Saved {inserted_count} new records to {db_name}.")
