@@ -93,3 +93,23 @@ def load_data(cleaned_jobs, db_name="job_tracker.dp"):
     connection.close()
 
     print(f"Data loading successful. Saved {inserted_count} new records to {db_name}.")
+
+
+
+
+
+if __name__ == "__main__":
+    print("Starting Job Tracker Data Pipeline")
+
+    # Extraction layer
+    raw_data = extract_data()
+
+    
+    if raw_data:
+        # Transformation layer
+        cleaned_data = transform_data(raw_data)
+
+        # Loading layer
+        load_data(cleaned_data)
+
+    print("Pipeline Execution Finished")
