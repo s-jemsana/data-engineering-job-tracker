@@ -19,8 +19,8 @@ def extract_data():
     params = {
         "app_id": ADZUNA_APP_ID,
         "app_key": ADZUNA_APP_KEY,
-        "what": "developer",
-        "results_per_page": 5   # Keeping it small for easy testing 
+        "what": "data analyst",
+        "results_per_page": 5  # Keeping it small for easy testing 
     }
 
     try:
@@ -37,39 +37,50 @@ def extract_data():
         return {}
     
 
-def transform_data(raw_jobs):
+def transform_data(raw_api_data):
     """Cleans and standardizes raw job data."""
-    cleaned_jobs = []
+    clean_jobs_list = []
+
+    # Adzuna packages its list of jobs inside the "results" key
+    raw_jobs = raw_api_data.get("results", [])
 
     for job in raw_jobs:
         # Clean strings using whitespace stripping
-        title = job.get("title", "Unknown Title").strip()
-        company = job.get("company", "Unknown Company").strip()
-        location = job.get("location", "Remote").strip()
+        title = job.get("title", "").strip()
+        url = job.get("redirect_url", "").strip()
 
-        # Check for missing or empty salary info and apply a default fallback value
-        raw_salary = job.get("salary", "")
-        if not raw_salary or raw_salary.strip() == "":
+        # Defensive parsing for nested company dictionary
+        company_info = job.get("company", {})
+        company = company_info.get("display_name", "Not Specified").strip()
+
+        # Defensive parsing for nested locatio list
+        location_info = job.get("location", {})
+        location_list = location_info.get("area", [])
+        location = ", ".join(location_list) if location_list else "South Africa"
+
+        # Handle salary data (Adzuna provides max values as numbers)
+        salary_max = job.get("salary_max")
+        if not salary_max:
             salary = "Not Specified"
         else:
-            salary = raw_salary.strip()
+            salary = f"Up to R{int(salary_max):,}"
 
-        url = job.get("url", "").strip()
 
         # Only add the job if it has a valid application link
-        if url:
-            cleaned_jobs.append({
-                "job_title": title,
-                "company": company,
-                "location": location,
-                "salary": salary,
-                "job_url": url
-            })
+        clean_job = {
+            "title": title,
+            "company": company,
+            "location": location,
+            "salary": salary,
+            "url": url
+        }
 
-    print(f"Data transformation successful. Cleaned {len(cleaned_jobs)} records")
-    return cleaned_jobs
+        clean_jobs_list.append(clean_job)
 
-def load_data(cleaned_jobs, db_name="job_tracker.dp"):
+    print(f"Successfully transformed and cleaned {len(clean_jobs_list)} records")
+    return clean_jobs_list
+
+def load_data(clean_jobs_list, db_name="job_tracker.db"):
     """Loads cleaned job data into a local SQLite relational database."""
     # Connect to SQLite (will create the file if it doesn't exist)
     connection = sqlite3.connect(db_name)
@@ -80,27 +91,27 @@ def load_data(cleaned_jobs, db_name="job_tracker.dp"):
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS jobs (
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   job_title TEXT NOT NULL,
+                   title TEXT NOT NULL,
                    company TEXT NOT NULL,
                    location TEXTX NOT NULL,
                    salary TEXT,
-                   job_url TEXT NOT NULL UNIQUE
+                   url TEXT NOT NULL
                    )
                    """)
     inserted_count = 0
 
     # Loop through the list of dictionaries and insert data safely
-    for job in cleaned_jobs:
+    for job in clean_jobs_list:
         try:
             cursor.execute("""
-                           INSERT INTO jobs (job_title, company, location, salary, job_url)
+                           INSERT INTO jobs (title, company, location, salary, url)
                            VALUES (?, ?, ?, ?, ?)
                            """, (
-                               job["job_title"],
+                               job["title"],
                                job["company"],
                                job["location"],
                                job["salary"],
-                               job["job_url"]
+                               job["url"]
                            ))
             inserted_count += 1
         except sqlite3.IntegrityError:
