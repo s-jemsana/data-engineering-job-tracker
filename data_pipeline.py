@@ -12,20 +12,29 @@ ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
 
 def extract_data():
-    """Extracts raw job data from the target public API."""
-    url = "https://demo-api.wethinkcode.co.za/jobs" # Simulated target endpoint
+    """Extracts raw software developer job data from the Adzuna SA API."""
+    # Target country "za" (South Africa) for search page 1
+    url = "https://api.adzuna.com/v1/api/jobs/za/search/1"
+
+    params = {
+        "app_id": ADZUNA_APP_ID,
+        "app_key": ADZUNA_APP_KEY,
+        "what": "developer",
+        "results_per_page": 5   # Keeping it small for easy testing 
+    }
 
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, params=params, timeout=10)
         # Raise an exception if the server returns a bad status code (like 404 or 500)
         response.raise_for_status()
 
+        raw_data = response.json()
         print("Data extraction successful")
-        return response.json()
+        return raw_data
     
     except requests.exceptions.RequestException as e:
-        print(f"Extraction failed due to network error: {e}")
-        return []
+        print(f"An error occurred during extraction: {e}")
+        return {}
     
 
 def transform_data(raw_jobs):
