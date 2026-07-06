@@ -1,5 +1,15 @@
 import sqlite3
 import requests
+import os
+from dotenv import load_dotenv
+
+# Loads the .env contents into memory
+load_dotenv()
+
+# Get hidden keys from memory and assign to variables
+ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
+ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
+
 
 def extract_data():
     """Extracts raw job data from the target public API."""
