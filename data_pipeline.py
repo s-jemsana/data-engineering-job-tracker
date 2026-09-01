@@ -29,7 +29,7 @@ def extract_data(search_term="software developer", results_per_page=10):
         response.raise_for_status()
 
         raw_data = response.json()
-        print("Data extraction for search term: '{search_term}' successful")
+        print(f"Data extraction for '{search_term}': successful")
         return raw_data
     
     except requests.exceptions.RequestException as e:
@@ -95,8 +95,8 @@ def load_data(clean_jobs_list, db_name="job_tracker.db"):
                    company TEXT NOT NULL,
                    location TEXT NOT NULL,
                    salary TEXT,
-                   url TEXT NOT NULL UNIQUE
-                   created_at TIMESTAMO DEFAULT CURRENT_TIMESTAMP
+                   url TEXT NOT NULL UNIQUE,
+                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                    )
                    """)
     inserted_count = 0
