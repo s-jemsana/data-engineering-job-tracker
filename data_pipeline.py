@@ -93,9 +93,10 @@ def load_data(clean_jobs_list, db_name="job_tracker.db"):
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                    title TEXT NOT NULL,
                    company TEXT NOT NULL,
-                   location TEXTX NOT NULL,
+                   location TEXT NOT NULL,
                    salary TEXT,
-                   url TEXT NOT NULL
+                   url TEXT NOT NULL UNIQUE
+                   created_at TIMESTAMO DEFAULT CURRENT_TIMESTAMP
                    )
                    """)
     inserted_count = 0
