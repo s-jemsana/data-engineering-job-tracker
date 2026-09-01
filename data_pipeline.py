@@ -60,10 +60,14 @@ def transform_data(raw_api_data):
 
         # Handle salary data (Adzuna provides max values as numbers)
         salary_max = job.get("salary_max")
-        if not salary_max:
-            salary = "Not Specified"
-        else:
+        salary_min = job.get("salary_min")
+
+        if salary_max:
             salary = f"Up to R{int(salary_max):,}"
+        elif salary_min:
+            salary = f"From R{int(salary_min):,}"
+        else:
+            salary = "Not Specified"
 
 
         # Only add the job if it has a valid application link
