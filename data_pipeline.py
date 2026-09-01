@@ -11,16 +11,16 @@ ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
 ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
 
-def extract_data():
-    """Extracts raw software developer job data from the Adzuna SA API."""
+def extract_data(search_term="software developer", results_per_page=10):
+    """Extracts raw job data from the Adzuna SA API with dynamic search parameters."""
     # Target country "za" (South Africa) for search page 1
     url = "https://api.adzuna.com/v1/api/jobs/za/search/1"
 
     params = {
         "app_id": ADZUNA_APP_ID,
         "app_key": ADZUNA_APP_KEY,
-        "what": "data analyst",
-        "results_per_page": 5  # Keeping it small for easy testing 
+        "what": search_term,
+        "results_per_page": results_per_page
     }
 
     try:
@@ -29,7 +29,7 @@ def extract_data():
         response.raise_for_status()
 
         raw_data = response.json()
-        print("Data extraction successful")
+        print("Data extraction for search term: '{search_term}' successful")
         return raw_data
     
     except requests.exceptions.RequestException as e:
