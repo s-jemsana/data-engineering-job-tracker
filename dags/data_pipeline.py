@@ -10,6 +10,9 @@ load_dotenv()
 ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
 ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
+if not ADZUNA_APP_ID or not ADZUNA_APP_KEY:
+    raise ValueError("Missing Adzuna credentials. Set ADZUNA_APP_ID and ADZUNA_APP_KEY in the Airflow environment.")
+
 
 def extract_data(search_term="software developer", results_per_page=10):
     """Extracts raw job data from the Adzuna SA API with dynamic search parameters."""
