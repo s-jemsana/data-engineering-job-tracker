@@ -160,3 +160,6 @@ This project taught me how important it is to separate data engineering logic fr
 I also learned that a pipeline is only as reliable as the environment it runs in. Locally, the script worked because the environment variables and Python setup were already in place. In Docker, I had to explicitly pass the Adzuna credentials into the Airflow services and understand how Airflow discovers DAGs and runs tasks in isolation. That made the project feel much more like a real production workflow.
 
 Most importantly, I learned that small incremental changes matter. Fixing one issue at a time — first the ETL logic, then the Airflow wiring, and then the Docker environment — made the project much easier to reason about and track in Git. It also reinforced that data engineering is not just about writing transformations; it is about making those transformations dependable in a scheduled environment.
+
+### Project verification code
+WTC-Y8XVFPML
